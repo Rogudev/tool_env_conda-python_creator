@@ -88,7 +88,7 @@ echo
 
 # create env
 if [ "$environment" -eq 1 ]; then
-# ask python version
+    # for Conda ask python version
     read -p "Input the Python version (3.9 by default): " python_version
     python_version=${python_version:-3.9}
 
