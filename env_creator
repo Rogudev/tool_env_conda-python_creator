@@ -3,22 +3,10 @@
 conda_env_dir="/home/$USER/Environments/conda"
 python_env_dir="/home/$USER/Environments/python"
 
-# check if paths exists
-if [ ! -e "$conda_env_dir" ]; then
-    echo -e "\nCreating the requred dir for Conda envs."
-    mkdir -p $conda_env_dir
-    echo created $conda_env_dir path
-fi
-if [ ! -e "$python_env_dir" ]; then
-    echo -e "\nCreating the requred dir for Python envs."
-    mkdir -p $python_env_dir
-    echo created $python_env_dir path
-fi
-
 # loop to handle invalid input
 while true; do
-    echo -e "\nConda or Python env? \n\t1-Conda \n\t2-Python"
-    read -p ">> " environment
+    echo -e "Conda or Python env? \n\t1-Conda \n\t2-Python"
+    read environment
 
     # handle choice
     if [ "$environment" -eq 1 ]; then
@@ -51,83 +39,56 @@ while true; do
                 exit
             else
                 echo "Python found at $exists_python"
-                python_command="python"
-                echo -e "\nExisting envs:"
-                echo "----------------------------"
+                echo "Existing envs:"
                 ls $python_env_dir
-                echo "----------------------------"
                 break 
             fi
 
         else 
             echo "Python3 found at $exists_python"
-            python_command="python3"
-            echo -e "\nExisting envs:"
-            echo "----------------------------"
+            echo "Existing envs:"
             ls $python_env_dir
-            echo "----------------------------"
             break 
         fi
         
     else
-        echo -e "\nInvalid choice. Please select 1 or 2."
+        echo "Invalid choice. Please select 1 or 2."
     fi
 done
 
 # get link path
-echo -e "\nInsert the path where to create the access link"
-read -p ">> " link_dir
+echo -e Insert the path where to create the access link
+read link_dir
 # remove quotes
 link_dir=${link_dir//\'/}
 link_dir=${link_dir//\"/}
 
 # get env name
-echo -e "\nInsert the env name"
-read -p ">> " envname
+echo -e "Insert the env name"
+read envname
 echo
 
 # create env
 if [ "$environment" -eq 1 ]; then
-    # for Conda ask python version
+# ask python version
     read -p "Input the Python version (3.9 by default): " python_version
     python_version=${python_version:-3.9}
 
     # create env
     echo "Creating Conda environment..."
     conda create --name "$envname" python="$python_version"
-
+    
     # link env: target and link_path
-    ln -s $conda_env_dir/$envname $link_dir
+    ln -s "$conda_env_dir/$envname/" "$link_dir"
 
 elif [ "$environment" -eq 2 ]; then
     echo "Creating Python environment..."
     cd $python_env_dir
+    python3 -m venv $envname
+    echo "Python env created successfully..."
 
-    # check if exists
-    if ls "$envname" > /dev/null 2>&1; then
-        echo -e "Python env exists replace? \n\t1 - yes \n\t2 - no"
-        read -p ">> " choice
 
-        if [ "$choice" -eq 1 ]; then
-            $python_command -m venv $envname
-            echo "Python env created successfully"
-
-        elif [ "$choice" -eq 2 ]; then
-            echo "$python_command venv not created"
-        fi
-    else
-        $python_command -m venv $envname
-        echo "Python env created successfully"
-    fi
-
-    echo "Creating the link..."
-    
-    if [ -e "$link_dir/$envname" ]; then
-        echo -e "\nLink already exists at $link_dir. Removing the existing link."
-        rm -rf "$link_dir/$envname" 
-    fi
-
-    ln -s "$python_env_dir/$envname" "$link_dir"
+    ln -s "$python_env_dir/$envname/" "$link_dir"
 fi
 
 echo
